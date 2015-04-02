@@ -8,7 +8,7 @@ outputname="myfile.csv"
 
 # as.numeric(HEAD(file)$headers$"content-length")<5000000
 
-if( as.numeric(HEAD(file)$headers$"content-length")<5000000){
+if( as.numeric(HEAD(file)$headers$"content-length")<50000000){
 
     download(file,destfile=outputname);
     cat(
