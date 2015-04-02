@@ -6,28 +6,27 @@ loadpkg <- function(x){
   }else{library(x,character.only=T)}
 }
 
-
-# headers <- HEAD(file)$headers
-# filesize <- headers$"content-length"
-# filetype <- headers$"content-type"
-
-
-
 loadpkg("downloader")
 loadpkg("httr")
 
 
-shinyUI(fluidPage(
-  textInput("valuetext", label = h3("URL"), 
+shinyUI(pageWithSidebar(
+  headerPanel("Importing Web File"),
+  
+  sidebarPanel(
+  textInput("valuetext", label = h3("CSV URL"), 
             value = ""),
   # Copy the line below to make an action button
-  actionButton("action", label = "Get Data"),
-  
-  hr(),
-  #verbatimTextOutput("value"),
-  #hr(),
-  verbatimTextOutput("valuetext"),
-  hr(),
-  textOutput("summary")
-  verbatimTextOutput("check")
+  actionButton("action", label = "Get Data")
+  ),
+  #
+  mainPanel(
+    
+    #something
+    
+    tabsetPanel(
+      tabPanel("Summary Statistics", tableOutput("summary")),
+      tabPanel("Box Plots", plotOutput("plot"))
+    )
+  )
 ))
