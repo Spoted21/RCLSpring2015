@@ -1,5 +1,19 @@
-library(downloader)
-library(httr)
+loadpkg <- function(x){
+  if(!is.element(x, installed.packages()))
+  {install.packages(x)
+   library(x,character.only=T)
+  }else{library(x,character.only=T)}
+}
+
+
+headers <- HEAD(file)$headers
+filesize <- headers$"content-length"
+filetype <- headers$"content-type"
+
+
+
+loadpkg("downloader")
+loadpkg("httr")
 
 file = "http://www.beardedanalytics.com/todd/iris.csv"
 outputname="myfile.csv"
@@ -8,7 +22,9 @@ outputname="myfile.csv"
 
 # as.numeric(HEAD(file)$headers$"content-length")<5000000
 
-if( as.numeric(HEAD(file)$headers$"content-length")<5000000){
+if( as.numeric( HEAD(file)$headers$"content-length"  )<5000000 & 
+      grep( pattern="^.*\\csv$", x = filetype ) ==1
+      ){
 
     download(file,destfile=outputname);
     cat(
@@ -16,7 +32,7 @@ if( as.numeric(HEAD(file)$headers$"content-length")<5000000){
              getwd(),"/",outputname)
     )
 }else
-  stop("File is larger than 5MB")
+  stop("File is larger than 5MB or File is not a csv")
 
 # Trying using COmmand in linux to obtain file size
 # stat
