@@ -1,9 +1,14 @@
 library(downloader)
+library(httr)
 
 file = "http://www.beardedanalytics.com/todd/iris.csv"
 outputname="myfile.csv"
 #Test is this works
-if( round( file.info(file)$size/1000,1)*1000<=5 ){
+# HEAD(file)$headers$"content-length"
+
+# as.numeric(HEAD(file)$headers$"content-length")<5000000
+
+if( as.numeric(HEAD(file)$headers$"content-length")<5000000){
 
     download(file,destfile=outputname);
     cat(
@@ -33,33 +38,33 @@ length(mydata) , " columns. \n You have ", length(complete.cases(mydata)=="TRUE"
 )
         
 
+names(mydata)
 
 
-
-
-#Option 1 - parse this
-wget --spider http://www.beardedanalytics.com/todd/iris.csv
-
-#Option 2 
-system("
-wget http://www.beardedanalytics.com/todd/iris.csv --spider --server-response -O - 2>&1 | sed -ne '/Content-Length/{s/.*: //;p}'
-")
-
-
-system(
-  paste0("wget ",file,"--spider --server-response -O - 2>&1 | sed -ne '/Content-Length/{s/.*: //;p}'
-       ")
-)
-
-
-
-> On debian-based platforms (like Ubuntu) always first attempt to install
-> via
-> apt-get. So:
-  > apt-cache search rcurl
-> (r-cran-rcurl should be a result)
-> apt-get install -t <repoName> r-cran-rcurl
-
-
-
-apt-get install -t <repoName> r-cran-rcurl
+# 
+# #Option 1 - parse this
+# wget --spider http://www.beardedanalytics.com/todd/iris.csv
+# 
+# #Option 2 
+# system("
+# wget http://www.beardedanalytics.com/todd/iris.csv --spider --server-response -O - 2>&1 | sed -ne '/Content-Length/{s/.*: //;p}'
+# ")
+# 
+# 
+# system(
+#   paste0("wget ",file,"--spider --server-response -O - 2>&1 | sed -ne '/Content-Length/{s/.*: //;p}'
+#        ")
+# )
+# 
+# 
+# 
+# > On debian-based platforms (like Ubuntu) always first attempt to install
+# > via
+# > apt-get. So:
+#   > apt-cache search rcurl
+# > (r-cran-rcurl should be a result)
+# > apt-get install -t <repoName> r-cran-rcurl
+# 
+# 
+# 
+# apt-get install -t <repoName> r-cran-rcurl
