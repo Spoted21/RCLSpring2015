@@ -1,7 +1,6 @@
 library(downloader)
 library(httr)
 
-<<<<<<< HEAD
 # setting a generic dataframe to store information globally
 inputData <- data.frame()
   
@@ -24,8 +23,6 @@ loadpkg("downloader")
 loadpkg("httr")
 
 
-
->>>>>>> 453f5235b4025c48f1decca148ff0c5002fa9c8f
 shinyServer(function(input, output) {
   
 #   

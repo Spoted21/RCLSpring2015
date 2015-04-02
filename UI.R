@@ -1,6 +1,4 @@
 
-<<<<<<< HEAD
-=======
 loadpkg <- function(x){
   if(!is.element(x, installed.packages()))
   {install.packages(x)
@@ -19,7 +17,6 @@ loadpkg("downloader")
 loadpkg("httr")
 
 
->>>>>>> 453f5235b4025c48f1decca148ff0c5002fa9c8f
 shinyUI(fluidPage(
   textInput("valuetext", label = h3("URL"), 
             value = ""),
@@ -31,9 +28,6 @@ shinyUI(fluidPage(
   #hr(),
   verbatimTextOutput("valuetext"),
   hr(),
-<<<<<<< HEAD
   textOutput("summary")
-=======
   verbatimTextOutput("check")
->>>>>>> 453f5235b4025c48f1decca148ff0c5002fa9c8f
 ))
