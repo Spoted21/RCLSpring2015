@@ -1,5 +1,4 @@
 
-
 shinyUI(fluidPage(
   textInput("valuetext", label = h3("URL"), 
             value = "Enter URL"),
@@ -9,5 +8,7 @@ shinyUI(fluidPage(
   hr(),
   #verbatimTextOutput("value"),
   #hr(),
-  verbatimTextOutput("valuetext")
+  verbatimTextOutput("valuetext"),
+  hr(),
+  textOutput("summary")
 ))
