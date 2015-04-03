@@ -21,7 +21,7 @@ shinyServer(function(input, output) {
       if('content-length' %in% names(HEAD(input$valuetext)$header) & HEAD(input$valuetext)$headers$"content-type" == "text/csv"){
         
         if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
-          inputData <<- read.csv(input$valuetext)
+          inputData <- read.csv(input$valuetext) #only needs to function locally, globally will reference "value()"
           inputData
         } else {
           stop("File is larger than import max limit (", file.size.limit, "mb)")
@@ -39,6 +39,24 @@ shinyServer(function(input, output) {
       
     )
   })
+  
+  
+  
+  
+  
+  #creating a UI selection menu based off of the input dataset
+  output$ui <- renderUI({
+    if(input$selectData == FALSE | input$action == 0)
+      return()
+    
+    var.names <- names(value())
+    
+    checkboxGroupInput("selected", "Which variables do you wish to include?", choices=var.names, selected = var.names)
+  })
+    
+  
+  
+  
   
   output$dataset <- renderDataTable({
     if(input$action != 0) value()
@@ -61,6 +79,7 @@ shinyServer(function(input, output) {
   })
 
 })
+
 
 # 
 # shinyServer(function(input, output) {

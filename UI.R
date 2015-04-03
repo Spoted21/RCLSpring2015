@@ -23,7 +23,12 @@ shinyUI(pageWithSidebar(
   h4("Data Summary"),
   wellPanel( 
     textOutput("DataSummaryText")
-  )
+  ),
+  hr(),
+  h4("Select Data"),
+  checkboxInput("selectData", "Check if you wish to specify columns", value=FALSE),
+  hr(),
+  uiOutput("ui") #created on the server side to give options based on data columns
  ),
   #
   mainPanel(
