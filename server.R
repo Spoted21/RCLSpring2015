@@ -10,7 +10,6 @@ loadpkg("downloader")
 loadpkg("httr")
 
 # setting a generic dataframe to store information globally
-inputData <- data.frame()
 
 shinyServer(function(input, output) {
   
@@ -24,6 +23,11 @@ shinyServer(function(input, output) {
       stop("File is larger than 5MB")
       }
     )
+  })
+  
+  output$dataset <- renderDataTable({
+    if(input$action != 0) value()
+    else {stop("Please enter a URL")}
   })
   
   output$summary <- renderTable({

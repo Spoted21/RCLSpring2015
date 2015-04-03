@@ -25,6 +25,7 @@ shinyUI(pageWithSidebar(
     #something
     
     tabsetPanel(
+      tabPanel("The Data", dataTableOutput("dataset")),
       tabPanel("Summary Statistics", tableOutput("summary")),
       tabPanel("Box Plots", plotOutput("plot"))
     )
