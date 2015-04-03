@@ -51,6 +51,18 @@ shinyServer(function(input, output) {
     if(input$action != 0) boxplot(value())
     else {stop("Please enter a URL")}
   })
+  
+  output$DataSummaryText <- renderText({
+    if(input$action != 0) 
+      paste0("Your dataset has " , nrow(value()) ," rows and ",
+             length(value()) , " columns. \n You have ", length(complete.cases(value())=="TRUE") ,
+             " complete cases which makes for ",round(1- ( length(complete.cases(value())=="TRUE") / nrow(value()) ),2),
+             "% missing data.")
+    
+         
+    else {stop("Please enter a URL")}
+  })
+
 })
 
 # 

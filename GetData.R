@@ -46,7 +46,7 @@ cat("Data Loaded...\n")
 summary(mydata)
 
 #Additonal Data Info
-cat(
+datamessage <- cat(
   paste0("Your dataset has " , nrow(mydata) ," rows and ",
 length(mydata) , " columns. \n You have ", length(complete.cases(mydata)=="TRUE") ,
 " complete cases which makes for ",round(1- ( length(complete.cases(mydata)=="TRUE") / nrow(mydata) ),2),

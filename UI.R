@@ -18,7 +18,13 @@ shinyUI(pageWithSidebar(
             value = ""),
   # Copy the line below to make an action button
   actionButton("action", label = "Get Data")
-  ),
+ , hr(),
+  hr(),
+  h4("Data Summary"),
+  wellPanel( 
+    textOutput("DataSummaryText")
+  )
+ ),
   #
   mainPanel(
     
