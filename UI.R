@@ -17,8 +17,8 @@ shinyUI(pageWithSidebar(
   textInput("valuetext", label = h3("CSV URL"), 
             value = ""),
   # Copy the line below to make an action button
-  actionButton("action", label = "Get Data")
- , hr(),
+  actionButton("action", label = "Get Data"),
+  hr(),
   hr(),
   h4("Data Summary"),
   wellPanel( 

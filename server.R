@@ -8,6 +8,7 @@ loadpkg <- function(x){
 
 loadpkg("downloader")
 loadpkg("httr")
+file.size.limit <- 5 #in mb
 
 # setting a generic dataframe to store information globally
 
@@ -17,23 +18,25 @@ shinyServer(function(input, output) {
     input$action
     
     isolate(
-      if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<5000000 & HEAD(input$valuetext)$headers$"content-type" == "text/csv")
-      {
+      if('content-length' %in% names(HEAD(input$valuetext)$header) & HEAD(input$valuetext)$headers$"content-type" == "text/csv"){
         
-        inputData <<- read.csv(input$valuetext)
-        inputData
-        
-      } else if (HEAD(input$valuetext)$headers$"content-type" != "text/csv") 
-      {
-        
-      stop("File does not read as csv")
+        if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
+          inputData <<- read.csv(input$valuetext)
+          inputData
+        } else {
+          stop("File is larger than import max limit (", file.size.limit, "mb)")
+        }
       
-      } else if (as.numeric(HEAD(input$valuetext)$headers$"content-length")>=5000000) 
-      {
-        
-      stop("File is larger than 5MB")
+      } else if (!('content-length' %in% names(HEAD(input$valuetext)$header))) {
+        stop("File length cannot be determined. Ensure file is .csv.")
       
+      } else if (HEAD(input$valuetext)$headers$"content-type" != "text/csv") {
+      stop("Path does not read as csv")
+      
+      } else {
+        stop("Unspecified error in reading file.")
       }
+      
     )
   })
   
