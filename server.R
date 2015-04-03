@@ -28,10 +28,10 @@ shinyServer(function(input, output) {
         }
       
       } else if (!('content-length' %in% names(HEAD(input$valuetext)$header))) {
-        stop("File length cannot be determined. Ensure file is .csv.")
+        stop("File length cannot be determined. Ensure file is csv.")
       
       } else if (HEAD(input$valuetext)$headers$"content-type" != "text/csv") {
-      stop("Path does not read as csv")
+      stop("Path does not read as csv, please double check path.")
       
       } else {
         stop("Unspecified error in reading file.")
@@ -42,17 +42,14 @@ shinyServer(function(input, output) {
   
   output$dataset <- renderDataTable({
     if(input$action != 0) value()
-    else {stop("Please enter a URL")}
   })
   
   output$summary <- renderTable({
     if(input$action != 0) summary(value())
-    else {stop("Please enter a URL")}
   })
   
   output$plot <- renderPlot({
     if(input$action != 0) boxplot(value())
-    else {stop("Please enter a URL")}
   })
   
   output$DataSummaryText <- renderText({
@@ -61,9 +58,6 @@ shinyServer(function(input, output) {
              length(value()) , " columns. \n You have ", length(complete.cases(value())=="TRUE") ,
              " complete cases which makes for ",round(1- ( length(complete.cases(value())=="TRUE") / nrow(value()) ),2),
              "% missing data.")
-    
-         
-    else {stop("Please enter a URL")}
   })
 
 })
