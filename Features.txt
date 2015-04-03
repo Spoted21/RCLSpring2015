@@ -1,0 +1,9 @@
+It seems like we both would like to take this project half-way serious. So
+lets start a feature list file that we put in github. It will contain
+things that we want to do. Here are a few to start with.
+
+1. Read other files besides a csv
+2. Allow the deliminter of the file to be specified by user
+3. Allow simple Linear Regression
+4. Add checks of regression assumptions and issue warning() when they are
+violated.
