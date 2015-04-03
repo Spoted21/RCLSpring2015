@@ -12,7 +12,7 @@ file.size.limit <- 5 #in mb
 
 # setting a generic dataframe to store information globally
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   
   value <- reactive({
     input$action
@@ -59,15 +59,36 @@ shinyServer(function(input, output) {
   
   
   output$dataset <- renderDataTable({
-    if(input$action != 0) value()
+    if(input$action == 0) 
+      return()
+    
+    if(input$selectData) {
+      if(!is.null(input$selected)) value()[input$selected] #have to do this as the table will break if it gets a null value for even a second... other tables and plots just flash null then get reloaded... This also protects agains if there is no checkboxes checked...
+    } else {
+      value()
+    }
   })
   
   output$summary <- renderTable({
-    if(input$action != 0) summary(value())
+    if(input$action == 0) 
+      return()
+    
+    if(input$selectData) {
+      if(!is.null(input$selected)) summary(value()[input$selected])
+    } else {
+      summary(value())
+    }
   })
   
   output$plot <- renderPlot({
-    if(input$action != 0) boxplot(value())
+    if(input$action == 0) 
+      return()
+    
+    if(input$selectData) {
+      if(!is.null(input$selected)) boxplot(value()[input$selected])
+    } else {
+      boxplot(value())
+    }
   })
   
   output$DataSummaryText <- renderText({
