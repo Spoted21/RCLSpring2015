@@ -15,12 +15,24 @@ shinyServer(function(input, output) {
   
   value <- reactive({
     input$action
+    
     isolate(
-      if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<5000000 ){
+      if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<5000000 & HEAD(input$valuetext)$headers$"content-type" == "text/csv")
+      {
+        
         inputData <<- read.csv(input$valuetext)
         inputData
-      } else {
+        
+      } else if (HEAD(input$valuetext)$headers$"content-type" != "text/csv") 
+      {
+        
+      stop("File does not read as csv")
+      
+      } else if (as.numeric(HEAD(input$valuetext)$headers$"content-length")>=5000000) 
+      {
+        
       stop("File is larger than 5MB")
+      
       }
     )
   })
