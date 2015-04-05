@@ -8,7 +8,7 @@ loadpkg <- function(x){
 
 loadpkg("downloader")
 loadpkg("httr")
-
+loadpkg("shiny")
 
 shinyUI(pageWithSidebar(
   headerPanel("Importing Web File"),

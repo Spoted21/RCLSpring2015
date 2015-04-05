@@ -8,6 +8,8 @@ loadpkg <- function(x){
 
 loadpkg("downloader")
 loadpkg("httr")
+loadpkg("shiny")
+
 file.size.limit <- 5 #in mb
 
 # setting a generic dataframe to store information globally
