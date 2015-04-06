@@ -9,7 +9,7 @@ shinyUI(pageWithSidebar(
   
   sidebarPanel(
   textInput("valuetext", label = h3("CSV URL"), 
-            value = ""),
+            value = "http://www.beardedanalytics.com/todd/iris.csv"),
   # Copy the line below to make an action button
   actionButton("action", label = "Get Data"),
   hr(),
