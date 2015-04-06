@@ -1,9 +1,8 @@
 #    http://www.beardedanalytics.com/todd/iris.csv
-# if(!require("downloader")) install.packages("downloader")
-# if(!require("httr")) install.packages("httr")
-# if(!require("shiny")) install.packages("shiny")
-# library(downloader,httr,shiny)
-# update.packages(ask=FALSE)
+if(!require("downloader")) install.packages("downloader")
+if(!require("httr")) install.packages("httr")
+if(!require("shiny")) install.packages("shiny")
+library(downloader,httr,shiny)
 
 shinyUI(pageWithSidebar(
   headerPanel("Importing Web File"),
