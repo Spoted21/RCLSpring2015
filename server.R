@@ -1,3 +1,6 @@
+#    http://www.beardedanalytics.com/todd/iris.csv
+
+
 
 loadpkg <- function(x){
   if(!is.element(x, installed.packages()))
@@ -47,7 +50,7 @@ shinyServer(function(input, output, session) {
   
   
   #creating a UI selection menu based off of the input dataset
-  output$ui <- renderUI({
+  output$uiVar <- renderUI({
     if(input$selectData == FALSE | input$action == 0)
       return()
     
@@ -64,8 +67,8 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
-    if(input$selectData) {
-      if(!is.null(input$selected)) value()[input$selected] #have to do this as the table will break if it gets a null value for even a second... other tables and plots just flash null then get reloaded... This also protects agains if there is no checkboxes checked...
+    if(input$selectData & !is.null(input$selected)) {
+      value()[input$selected] #have to do this as the table will break if it gets a null value for even a second... other tables and plots just flash null then get reloaded... This also protects agains if there is no checkboxes checked...
     } else {
       value()
     }
@@ -75,8 +78,8 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
-    if(input$selectData) {
-      if(!is.null(input$selected)) summary(value()[input$selected])
+    if(input$selectData & !is.null(input$selected)) {
+      summary(value()[input$selected])
     } else {
       summary(value())
     }
@@ -86,8 +89,8 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
-    if(input$selectData) {
-      if(!is.null(input$selected)) boxplot(value()[input$selected],las=1)
+    if(input$selectData & !is.null(input$selected)) {
+      boxplot(value()[input$selected],las=1)
     } else {
       boxplot(value())
     }
@@ -99,6 +102,65 @@ shinyServer(function(input, output, session) {
              length(value()) , " columns. \n You have ", length(complete.cases(value())=="TRUE") ,
              " complete cases which makes for ",round(1- ( length(complete.cases(value())=="TRUE") / nrow(value()) ),2),
              "% missing data.")
+  })
+  
+  
+  
+  
+  
+  output$uiDV <- renderUI({
+    if(input$action == 0)
+      return()
+    
+    if(input$selectData & !is.null(input$selected)){
+      selectInput("dv", "Please select the dependent variable", choices=input$selected)
+    } else {
+      selectInput("dv", "Please select the dependent variable", choices=names(value()))
+    }
+  })
+  
+  
+  
+  
+  
+  regressionModel <- reactive({
+    if(input$action == 0)
+      return()
+    
+    # the following condition prevents an initial error when loading regression tab (due to not reading in the dv yet), but 
+    if(!is.null(input$dv)){ 
+      if(input$selectData & !is.null(input$selected)){
+        if(length(input$selected)<2)
+          stop("2 or more variables are needed for regression")
+        
+        dvColNum <- which(input$selected == input$dv)
+        
+        lm(value()[input$selected][,dvColNum] ~ ., 
+           data = value()[input$selected][,-dvColNum])
+      } else {
+        dvColNum <- which(names(value()) == input$dv)
+        
+        lm(value()[,dvColNum] ~ ., 
+           data=value()[,-dvColNum])
+      }
+    }
+    
+  })
+  
+  
+  output$regressionTable <- renderTable({
+    if(input$action == 0)
+      return()
+    
+    regressionModel()
+  })
+  
+  output$adjRSq <- renderText({
+    if(input$action == 0)
+      return()
+    
+    #use "getElement", as $ throws the error "$ invalid for atomic vectors"
+    getElement(summary(regressionModel()), "adj.r.squared")
   })
 
 })

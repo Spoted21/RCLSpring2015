@@ -1,3 +1,5 @@
+#    http://www.beardedanalytics.com/todd/iris.csv
+
 
 loadpkg <- function(x){
   if(!is.element(x, installed.packages()))
@@ -29,7 +31,7 @@ shinyUI(pageWithSidebar(
   checkboxInput("selectData", "Check if you wish to specify columns", value=FALSE),
   
   hr(),
-  uiOutput("ui") #created on the server side to give options based on data columns
+  uiOutput("uiVar") #created on the server side to give options based on data columns
  ),
   #
   mainPanel(
@@ -39,7 +41,15 @@ shinyUI(pageWithSidebar(
     tabsetPanel(
       tabPanel("The Data", dataTableOutput("dataset")),
       tabPanel("Summary Statistics", tableOutput("summary")),
-      tabPanel("Box Plots", plotOutput("plot"))
+      tabPanel("Box Plots", plotOutput("plot")),
+      tabPanel("Regression", 
+               uiOutput("uiDV"),
+               hr(),
+               h4("Variance Explained (Adjusted R Squared):"),
+               textOutput("adjRSq"),
+               hr(),
+               h4("Summary Table:"),
+               tableOutput("regressionTable"))
     )
   )
 ))
