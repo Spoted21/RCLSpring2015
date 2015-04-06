@@ -1,17 +1,9 @@
 #    http://www.beardedanalytics.com/todd/iris.csv
-
-
-
-loadpkg <- function(x){
-  if(!is.element(x, installed.packages()))
-  {install.packages(x)
-   library(x,character.only=T)
-  }else{library(x,character.only=T)}
-}
-
-loadpkg("downloader")
-loadpkg("httr")
-loadpkg("shiny")
+# if(!require("downloader")) install.packages("downloader")
+# if(!require("httr")) install.packages("httr")
+# if(!require("shiny")) install.packages("shiny")
+# library(downloader,httr,shiny)
+# update.packages(ask=FALSE)
 
 file.size.limit <- 5 #in mb
 
