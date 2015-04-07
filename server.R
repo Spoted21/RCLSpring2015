@@ -81,9 +81,9 @@ shinyServer(function(input, output, session) {
       return()
     
     if(input$selectData & !is.null(input$selected)) {
-      boxplot(value()[input$selected],las=1)
+      boxplot(value()[input$selected],las=1,col=c("orange","lightgreen","lightblue"))
     } else {
-      boxplot(value())
+      boxplot(value(),las=1,col=c("orange","lightgreen","lightblue"))
     }
   })
   
