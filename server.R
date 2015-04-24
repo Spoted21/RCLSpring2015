@@ -14,7 +14,7 @@ shinyServer(function(input, output, session) {
     input$action
     
     isolate(
-      if('content-length' %in% names(HEAD(input$valuetext)$header) & HEAD(input$valuetext)$headers$"content-type" == "text/csv"){ 
+      if('content-length' %in% names(HEAD(input$valuetext)$header) & HEAD(input$valuetext)$headers$"content-type" == "text/csv"){
         
         if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
           inputData <- read.csv(input$valuetext) #only needs to function locally, globally will reference "value()"
