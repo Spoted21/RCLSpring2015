@@ -2,7 +2,10 @@
 if(!require("downloader")) install.packages("downloader")
 if(!require("httr")) install.packages("httr")
 if(!require("shiny")) install.packages("shiny")
-library(downloader,httr,shiny)
+library(downloader)
+library(httr)
+library(shiny)
+
 
 shinyUI(pageWithSidebar(
   headerPanel("Importing Web File"),
@@ -48,7 +51,8 @@ shinyUI(pageWithSidebar(
                textOutput("adjRSq"),
                hr(),
                h4("Summary Table:"),
-               tableOutput("regressionTable"))
+               tableOutput("regressionTable")),
+      tabPanel("ScatterPlots",plotOutput("ScatPlot"))
     )
   )
 ))

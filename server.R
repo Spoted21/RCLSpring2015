@@ -136,6 +136,18 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  output$ScatPlot <- renderPlot({
+    if(input$action == 0) 
+      return()
+    
+    if(input$selectData & !is.null(input$selected)) {
+      plot(value()[input$selected])
+    } else {
+      plot(value())
+    }
+  })
+  
+  
   output$DataSummaryText <- renderText({
     if(input$action != 0) 
       paste0("Your dataset has " , nrow(value()) ," rows and ",
