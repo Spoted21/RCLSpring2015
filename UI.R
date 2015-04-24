@@ -8,23 +8,31 @@ shinyUI(pageWithSidebar(
   headerPanel("Importing Web File"),
   
   sidebarPanel(
-  textInput("valuetext", label = h3("CSV URL"), 
-            value = "http://www.beardedanalytics.com/todd/iris.csv"),
-  # Copy the line below to make an action button
-  actionButton("action", label = "Get Data"),
-  hr(),
-  hr(),
-  h4("Data Summary"),
-  wellPanel( 
-    textOutput("DataSummaryText")
+    
+    #adding the ability to chose between a local file and an online file
+    selectInput("locvsurl", "Select whether you'd prefer to use a local file or one from the web:",
+                choices = list("Local File" = "local",
+                               "URL" = "url"), selected="url"),
+    
+    textOutput("defaultText"),
+    
+    textInput("valuetext", label = textOutput("enterText"), 
+              value = ""),
+    # Copy the line below to make an action button
+    actionButton("action", label = "Get Data"),
+    hr(),
+    hr(),
+    h4("Data Summary"),
+    wellPanel( 
+      textOutput("DataSummaryText")
+    ),
+    hr(),
+    h4("Select Data"),
+    checkboxInput("selectData", "Check if you wish to specify columns", value=FALSE),
+    
+    hr(),
+    uiOutput("uiVar") #created on the server side to give options based on data columns
   ),
-  hr(),
-  h4("Select Data"),
-  checkboxInput("selectData", "Check if you wish to specify columns", value=FALSE),
-  
-  hr(),
-  uiOutput("uiVar") #created on the server side to give options based on data columns
- ),
   #
   mainPanel(
     

@@ -10,29 +10,75 @@ file.size.limit <- 5 #in mb
 
 shinyServer(function(input, output, session) {
   
+  
+  
+  #creating a reactive message
+  output$enterText <- renderText({
+    if(input$locvsurl == "local") { 
+      paste0("Please enter the filepath:")
+    } else if (input$locvsurl == "url") {
+      paste0("Please enter the url:")
+    } else {
+      paste0("Uh oh...")
+    }
+  })
+  
+  #creating reactive default input
+  output$defaultText <- renderText({
+    if(input$locvsurl == "local") { 
+      return()
+    } else if (input$locvsurl == "url") {
+      paste0("A trial website: http://www.beardedanalytics.com/todd/iris.csv")
+    } else {
+      paste0("Uh oh...")
+    }
+  })
+  
+  
+  
   value <- reactive({
     input$action
     
     isolate(
-      if('content-length' %in% names(HEAD(input$valuetext)$header) & HEAD(input$valuetext)$headers$"content-type" == "text/csv"){
+      #check if the user is entering a url or a local file
+      if (input$locvsurl == "url") {
         
-        if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
-          inputData <- read.csv(input$valuetext) #only needs to function locally, globally will reference "value()"
-          inputData
+        if('content-length' %in% names(HEAD(input$valuetext)$header) & HEAD(input$valuetext)$headers$"content-type" == "text/csv"){
+          
+          if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
+            inputData <- read.csv(input$valuetext) #only needs to function locally, globally will reference "value()"
+            inputData
+          } else {
+            stop("File is larger than import max limit (", file.size.limit, "mb)")
+          }
+        
+        } else if (!('content-length' %in% names(HEAD(input$valuetext)$header))) {
+          stop("File length cannot be determined. Ensure file is csv.")
+        
+        } else if (HEAD(input$valuetext)$headers$"content-type" != "text/csv") {
+        stop("Path does not read as csv, please double check path.")
+        
         } else {
-          stop("File is larger than import max limit (", file.size.limit, "mb)")
+          stop("Unspecified error in reading file.")
         }
-      
-      } else if (!('content-length' %in% names(HEAD(input$valuetext)$header))) {
-        stop("File length cannot be determined. Ensure file is csv.")
-      
-      } else if (HEAD(input$valuetext)$headers$"content-type" != "text/csv") {
-      stop("Path does not read as csv, please double check path.")
-      
+        
+      } else if(input$locvsurl == "local") {
+        
+        
+        
+        #put something with grepl to turn the filepath
+        grepl(".csv", input$valuetext, fixed=TRUE)
+        
+        
+        if(file.info(input$valuetext)$size > (file.size.limit*1000000)) stop("File is larger than import max limit (", file.size.limit, "mb)")
+        
+        
+        
       } else {
-        stop("Unspecified error in reading file.")
+        
+        stop("Uh oh...")
+        
       }
-      
     )
   })
   
