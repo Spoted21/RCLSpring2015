@@ -16,8 +16,7 @@ shinyUI(pageWithSidebar(
     
     textOutput("defaultText"),
     
-    textInput("valuetext", label = textOutput("enterText"), 
-              value = ""),
+    uiOutput("uiFile"),
     # Copy the line below to make an action button
     actionButton("action", label = "Get Data"),
     hr(),
