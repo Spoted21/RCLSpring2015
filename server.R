@@ -47,33 +47,42 @@ shinyServer(function(input, output, session) {
           
           if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
             inputData <- read.csv(input$valuetext) #only needs to function locally, globally will reference "value()"
-            inputData
           } else {
             stop("File is larger than import max limit (", file.size.limit, "mb)")
           }
-        
+          
         } else if (!('content-length' %in% names(HEAD(input$valuetext)$header))) {
           stop("File length cannot be determined. Ensure file is csv.")
-        
+          
         } else if (HEAD(input$valuetext)$headers$"content-type" != "text/csv") {
-        stop("Path does not read as csv, please double check path.")
-        
+          stop("Path does not read as csv, please double check path.")
+          
         } else {
           stop("Unspecified error in reading file.")
         }
         
       } else if(input$locvsurl == "local") {
         
+        # check that filepath is a csv
+        if(!grepl(".csv", input$valuetext, fixed=TRUE)) stop("Path does not read as csv, please double check path.")
         
+        #manipulating file name to be read by R
+        # If the file already has double backslashes or foreward slashes, read it in
+        if(grepl("\\\\", input$valuetext, fixed=TRUE) | grepl("/", input$valuetext, fixed=TRUE)) {
+          inputFile <- input$valuetext
+          # else, if the file uses single backslashes, change them to forward slashes
+        } else if (grepl("\\", input$valuetext, fixed=TRUE)){
+          inputFile <- gsub("\\", "/", input$valuetext, fixed=TRUE)
+        } else {
+          stop("Unkown error reading file (slashes may not be known, attempt converting to foreward slashes)")
+        }
         
-        #put something with grepl to turn the filepath
-        grepl(".csv", input$valuetext, fixed=TRUE)
+        # check that the file size is less than 5 mb (or whatever limit is set at the beginning of this file)
+        if(file.info(inputFile)$size > (file.size.limit*1000000)) stop("File is larger than import max limit (", file.size.limit, "mb)")
         
+        inputData <- read.csv(inputFile)
         
-        if(file.info(input$valuetext)$size > (file.size.limit*1000000)) stop("File is larger than import max limit (", file.size.limit, "mb)")
-        
-        
-        
+        #user input for local or url file is not being read correctly...
       } else {
         
         stop("Uh oh...")
@@ -95,7 +104,7 @@ shinyServer(function(input, output, session) {
     
     checkboxGroupInput("selected", "Which variables do you wish to include?", choices=var.names, selected = var.names)
   })
-    
+  
   
   
   
@@ -199,7 +208,7 @@ shinyServer(function(input, output, session) {
     #use "getElement", as $ throws the error "$ invalid for atomic vectors"
     getElement(summary(regressionModel()), "adj.r.squared")
   })
-
+  
 })
 
 
