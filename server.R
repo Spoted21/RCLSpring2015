@@ -12,25 +12,22 @@ shinyServer(function(input, output, session) {
   
   
   
-  #creating a reactive message
-  output$enterText <- renderText({
+  #creating reactive input types based off whether the user wishes to use online or local filepaths
+  output$uiFile <- renderUI({
+    
     if(input$locvsurl == "local") { 
-      paste0("Please enter the filepath:")
+      
+      fileInput("localFile", "Please choose the CSV file you wish to use", accept = "text/csv")
+      
     } else if (input$locvsurl == "url") {
-      paste0("Please enter the url:")
+      
+      textInput("valuetext", label = "Please enter the URL:", 
+                value = "http://www.beardedanalytics.com/todd/iris.csv")
+      
     } else {
-      paste0("Uh oh...")
-    }
-  })
-  
-  #creating reactive default input
-  output$defaultText <- renderText({
-    if(input$locvsurl == "local") { 
+      
       return()
-    } else if (input$locvsurl == "url") {
-      paste0("A trial website: http://www.beardedanalytics.com/todd/iris.csv")
-    } else {
-      paste0("Uh oh...")
+      
     }
   })
   
@@ -40,6 +37,8 @@ shinyServer(function(input, output, session) {
     input$action
     
     isolate(
+      
+      
       #check if the user is entering a url or a local file
       if (input$locvsurl == "url") {
         
@@ -61,28 +60,23 @@ shinyServer(function(input, output, session) {
           stop("Unspecified error in reading file.")
         }
         
+        
+      #execute if user uses a local file (input named input$localFile)  
       } else if(input$locvsurl == "local") {
         
-        # check that filepath is a csv
-        if(!grepl(".csv", input$valuetext, fixed=TRUE)) stop("Path does not read as csv, please double check path.")
+        userFile <- input$localFile #has "name" (which seems to end in the .csv), size, type (doesn't seem to work), and "datapath" which is where the file is
         
-        #manipulating file name to be read by R
-        # If the file already has double backslashes or foreward slashes, read it in
-        if(grepl("\\\\", input$valuetext, fixed=TRUE) | grepl("/", input$valuetext, fixed=TRUE)) {
-          inputFile <- input$valuetext
-          # else, if the file uses single backslashes, change them to forward slashes
-        } else if (grepl("\\", input$valuetext, fixed=TRUE)){
-          inputFile <- gsub("\\", "/", input$valuetext, fixed=TRUE)
-        } else {
-          stop("Unkown error reading file (slashes may not be known, attempt converting to foreward slashes)")
-        }
+        # check that filepath is a csv
+        if(!grepl(".csv", userFile$name, fixed=TRUE)) stop("Path does not read as csv, please double check path.")
         
         # check that the file size is less than 5 mb (or whatever limit is set at the beginning of this file)
-        if(file.info(inputFile)$size > (file.size.limit*1000000)) stop("File is larger than import max limit (", file.size.limit, "mb)")
+        if(userFile$size > (file.size.limit*1000000)) stop("File is larger than import max limit (", file.size.limit, "mb)")
         
-        inputData <- read.csv(inputFile)
+        inputData <- read.csv(userFile$datapath)
         
-        #user input for local or url file is not being read correctly...
+        
+        
+      #user input for local or url file is not being read correctly...
       } else {
         
         stop("Uh oh...")
