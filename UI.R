@@ -52,7 +52,7 @@ shinyUI(pageWithSidebar(
                hr(),
                h4("Summary Table:"),
                tableOutput("regressionTable")),
-      tabPanel("ScatterPlots",plotOutput("ScatPlot"))
+      tabPanel("Scatter Plots",plotOutput("ScatPlot"))
     )
   )
 ))
