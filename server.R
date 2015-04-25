@@ -189,7 +189,15 @@ shinyServer(function(input, output, session) {
           dvColNum <- which(input$selected == input$dv)
           ivColNum <- which(input$selected != input$dv)
           
-          lm()
+          lm(
+            as.formula(
+              paste0(input$selected[dvColNum],
+                "~",
+                input$selected[ivColNum]
+              )
+            ),
+            data=value()[input$selected]
+          )
         } else {
           dvColNum <- which(input$selected == input$dv)
           
