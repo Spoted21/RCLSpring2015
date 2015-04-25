@@ -8,7 +8,7 @@ library(shiny)
 
 
 shinyUI(pageWithSidebar(
-  headerPanel("Importing Web File"),
+  headerPanel("CSV Exploratory Tool"),
   
   sidebarPanel(
     
@@ -52,7 +52,7 @@ shinyUI(pageWithSidebar(
                hr(),
                h4("Summary Table:"),
                tableOutput("regressionTable")),
-      tabPanel("Scatter Plots",plotOutput("ScatPlot"))
+      tabPanel("ScatterPlots",plotOutput("ScatPlot"))
     )
   )
 ))
