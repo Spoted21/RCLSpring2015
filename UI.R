@@ -8,7 +8,7 @@ library(shiny)
 
 
 shinyUI(pageWithSidebar(
-  headerPanel("Importing Web File"),
+  headerPanel("CSV Exploratory Tool"),
   
   sidebarPanel(
     
