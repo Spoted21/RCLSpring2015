@@ -185,10 +185,21 @@ shinyServer(function(input, output, session) {
         if(length(input$selected)<2)
           stop("2 or more variables are needed for regression")
         
-        dvColNum <- which(input$selected == input$dv)
-        
-        lm(value()[input$selected][,dvColNum] ~ ., 
-           data = value()[input$selected][,-dvColNum])
+        if(length(input$selected)==2){
+          dvColNum <- which(input$selected == input$dv)
+          ivColNum <- which(input$selected != input$dv)
+          
+          #creating variables named the initial column names, so that these names maintain in the linear model output
+          assign(input$selected[dvColNum],value()[input$selected][,dvColNum])
+          assign(input$selected[ivColNum],value()[input$selected][,ivColNum])
+          
+          lm(eval(parse(text=input$selected[dvColNum])) ~ eval(parse(text=input$selected[ivColNum])), data=value()[input$selected])
+        } else {
+          dvColNum <- which(input$selected == input$dv)
+          
+          lm(value()[input$selected][,dvColNum] ~ ., 
+             data = value()[input$selected][,-dvColNum])
+        }
       } else {
         dvColNum <- which(names(value()) == input$dv)
         
