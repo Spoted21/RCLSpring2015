@@ -1,15 +1,9 @@
-if(!require("devtools")) install.packages("devtools", dependencies=TRUE)
-library(devtools)
-if(!require("readxl")) devtools::install_github("hadley/readxl")
 if(!require("downloader")) install.packages("downloader", dependencies=TRUE)
 if(!require("httr")) install.packages("httr", dependencies=TRUE)
 if(!require("shiny")) install.packages("shiny", dependencies=TRUE)
-library(readxl)
 library(downloader)
 library(httr)
 library(shiny)
-if(!require("xlsx")) install.packages("xlsx", dependencies=TRUE)
-library(xlsx)
 
 file.size.limit <- 5 #in mb
 
@@ -49,18 +43,11 @@ shinyServer(function(input, output, session) {
       #check if the user is entering a url or a local file
       if (input$locvsurl == "url") {
         
-        if('content-length' %in% names(HEAD(input$valuetext)$header) & (grepl(input$extension, input$valuetext, fixed=TRUE) | input$xl)){
+        if('content-length' %in% names(HEAD(input$valuetext)$header) & grepl(input$extension, input$valuetext, fixed=TRUE)){
           
           if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
             #inputData only needs to function locally, globally will reference "value()"
-            #This error check determines if this is supposed to be an excel file. If not, normal csv read
-            if(input$xl) {
-              inputData <- read.xlsx(input$valuetext)
-                
-            } else {
               inputData <- read.csv(input$valuetext, header=input$header, sep=input$sep, quote=input$quote) 
-              
-            }
             
           } else {
             stop("File is larger than import max limit (", file.size.limit, "mb)")
@@ -69,7 +56,7 @@ shinyServer(function(input, output, session) {
         } else if (!('content-length' %in% names(HEAD(input$valuetext)$header))) {
           stop("File length cannot be determined. Ensure file is csv.")
           
-        } else if (!grepl(input$extension, input$valuetext, fixed=TRUE) & !input$xl) {
+        } else if (!grepl(input$extension, input$valuetext, fixed=TRUE)) {
           stop("Path does not read as declared file type (", input$extension, "). Please double check path or file type options.")
           
         } else {
@@ -90,18 +77,8 @@ shinyServer(function(input, output, session) {
         if(userFile$size > (file.size.limit*1000000)) 
           stop("File is larger than import max limit (", file.size.limit, "mb)")
         
-        #This error check determines if this is supposed to be an excel file. If not, normal csv read
-        if(input$xl) {
-          inputData <- read_excel(userFile$datapath)
-          
-        } else {
-          inputData <- read.csv(userFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
-          
-        }
-        
-        
-        
-        
+        inputData <- read.csv(userFile$datapath, header=input$header, sep=input$sep, quote=input$quote)        
+
       #user input for local or url file is not being read correctly...
       } else {
         

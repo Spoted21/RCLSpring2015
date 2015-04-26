@@ -1,16 +1,9 @@
-if(!require("devtools")) install.packages("devtools", dependencies=TRUE)
-library(devtools)
-if(!require("readxl")) devtools::install_github("hadley/readxl")
 if(!require("downloader")) install.packages("downloader", dependencies=TRUE)
 if(!require("httr")) install.packages("httr", dependencies=TRUE)
 if(!require("shiny")) install.packages("shiny", dependencies=TRUE)
-library(readxl)
 library(downloader)
 library(httr)
 library(shiny)
-if(!require("xlsx")) install.packages("xlsx", dependencies=TRUE)
-library(xlsx)
-
 
 
 shinyUI(pageWithSidebar(
@@ -53,31 +46,24 @@ shinyUI(pageWithSidebar(
                hr(),
                
                checkboxInput('header', 'Check if the first row of your file contains headers', TRUE), 
-               
-               checkboxInput("xl", "Check if your file an Excel file (.xls or .xlsx)", FALSE),
-               
-               hr(),
-               
-               conditionalPanel(
-                 condition = 'input.xl==false',
                  
-                 radioButtons('sep', 'Separator',
-                              c(Comma=',',
-                                Semicolon=';',
-                                Tab='\t'),
-                              ','),
-                 
-                 radioButtons('quote', 'Quote',
-                              c(None='',
-                                'Double Quote'='"',
-                                'Single Quote'="'"),
-                              '"'),
-                 
-                 radioButtons('extension', 'Is the file a csv or txt?',
-                              c(CSV='.csv',
-                                TXT='.txt'),
-                              '.csv')
-               )
+               radioButtons('sep', 'Separator',
+                            c(Comma=',',
+                              Semicolon=';',
+                              Tab='\t'),
+                            ','),
+               
+               radioButtons('quote', 'Quote',
+                            c(None='',
+                              'Double Quote'='"',
+                              'Single Quote'="'"),
+                            '"'),
+               
+               radioButtons('extension', 'Is the file a csv or txt?',
+                            c(CSV='.csv',
+                              TXT='.txt'),
+                            '.csv')
+               
       )
     )
   ),
