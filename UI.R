@@ -8,6 +8,9 @@ library(readxl)
 library(downloader)
 library(httr)
 library(shiny)
+if(!require("xlsx")) install.packages("xlsx", dependencies=TRUE)
+library(xlsx)
+
 
 
 shinyUI(pageWithSidebar(
@@ -51,7 +54,7 @@ shinyUI(pageWithSidebar(
                
                checkboxInput('header', 'Check if the first row of your file contains headers', TRUE), 
                
-               checkboxInput("xl", "Check if your file an xls or xlsx file", FALSE),
+               checkboxInput("xl", "Check if your file an Excel file (.xls or .xlsx)", FALSE),
                
                hr(),
                

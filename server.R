@@ -1,5 +1,6 @@
-#    http://www.beardedanalytics.com/todd/iris.csv
-if(!require("readxl")) install.packages("readxl", dependencies=TRUE)
+if(!require("devtools")) install.packages("devtools", dependencies=TRUE)
+library(devtools)
+if(!require("readxl")) devtools::install_github("hadley/readxl")
 if(!require("downloader")) install.packages("downloader", dependencies=TRUE)
 if(!require("httr")) install.packages("httr", dependencies=TRUE)
 if(!require("shiny")) install.packages("shiny", dependencies=TRUE)
@@ -7,6 +8,8 @@ library(readxl)
 library(downloader)
 library(httr)
 library(shiny)
+if(!require("xlsx")) install.packages("xlsx", dependencies=TRUE)
+library(xlsx)
 
 file.size.limit <- 5 #in mb
 
@@ -46,15 +49,17 @@ shinyServer(function(input, output, session) {
       #check if the user is entering a url or a local file
       if (input$locvsurl == "url") {
         
-        if('content-length' %in% names(HEAD(input$valuetext)$header) & grepl(input$extension, input$valuetext, fixed=TRUE)){
+        if('content-length' %in% names(HEAD(input$valuetext)$header) & (grepl(input$extension, input$valuetext, fixed=TRUE) | input$xl)){
           
           if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
             #inputData only needs to function locally, globally will reference "value()"
             #This error check determines if this is supposed to be an excel file. If not, normal csv read
             if(input$xl) {
-              
+              inputData <- read.xlsx(input$valuetext)
+                
             } else {
               inputData <- read.csv(input$valuetext, header=input$header, sep=input$sep, quote=input$quote) 
+              
             }
             
           } else {
@@ -64,7 +69,7 @@ shinyServer(function(input, output, session) {
         } else if (!('content-length' %in% names(HEAD(input$valuetext)$header))) {
           stop("File length cannot be determined. Ensure file is csv.")
           
-        } else if (!grepl(input$extension, input$valuetext, fixed=TRUE)) {
+        } else if (!grepl(input$extension, input$valuetext, fixed=TRUE) & !input$xl) {
           stop("Path does not read as declared file type (", input$extension, "). Please double check path or file type options.")
           
         } else {
@@ -78,7 +83,7 @@ shinyServer(function(input, output, session) {
         userFile <- input$localFile #has "name" (which seems to end in the .csv), size, type (doesn't seem to work), and "datapath" which is where the file is
         
         # check that filepath is a csv
-        if(!grepl(input$extension, input$valuetext, fixed=TRUE)) 
+        if(!grepl(input$extension, userFile$name, fixed=TRUE)) 
           stop("Path does not read as declared file type (", input$extension, "). Please double check path or file type options.")
         
         # check that the file size is less than 5 mb (or whatever limit is set at the beginning of this file)
@@ -87,9 +92,11 @@ shinyServer(function(input, output, session) {
         
         #This error check determines if this is supposed to be an excel file. If not, normal csv read
         if(input$xl) {
+          inputData <- read_excel(userFile$datapath)
           
         } else {
-          inputData <- read.csv(userFile$datapath, header=input$header, sep=input$sep, quote=input$quote) 
+          inputData <- read.csv(userFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
+          
         }
         
         
