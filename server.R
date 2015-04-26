@@ -42,7 +42,7 @@ shinyServer(function(input, output, session) {
       #check if the user is entering a url or a local file
       if (input$locvsurl == "url") {
         
-        if('content-length' %in% names(HEAD(input$valuetext)$header) & HEAD(input$valuetext)$headers$"content-type" == "text/csv"){
+        if('content-length' %in% names(HEAD(input$valuetext)$header) & grepl(input$extension, input$valuetext, fixed=TRUE)){
           
           if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
             inputData <- read.csv(input$valuetext) #only needs to function locally, globally will reference "value()"
@@ -57,10 +57,7 @@ shinyServer(function(input, output, session) {
           stop("Path does not read as csv, please double check path.")
           
         } else {
-          # Error checks failed... This will try to read the file in anyways and, if there is an error, return that there was an unspecifid error
-          lastDitch <- try(read.csv(input$valuetext), silent=TRUE)
-          if(class(lastDitch)=="try-error") stop("Unspecified error in reading file.")
-          inputData <- read.csv(input$valuetext)
+          stop("Unspecified error in reading file.")
         }
         
         
