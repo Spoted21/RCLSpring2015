@@ -1,8 +1,12 @@
 #    http://www.beardedanalytics.com/todd/iris.csv
-if(!require("downloader")) install.packages("downloader")
-if(!require("httr")) install.packages("httr")
-if(!require("shiny")) install.packages("shiny")
-library(downloader,httr,shiny)
+if(!require("readxl")) install.packages("readxl", dependencies=TRUE)
+if(!require("downloader")) install.packages("downloader", dependencies=TRUE)
+if(!require("httr")) install.packages("httr", dependencies=TRUE)
+if(!require("shiny")) install.packages("shiny", dependencies=TRUE)
+library(readxl)
+library(downloader)
+library(httr)
+library(shiny)
 
 file.size.limit <- 5 #in mb
 
@@ -45,7 +49,13 @@ shinyServer(function(input, output, session) {
         if('content-length' %in% names(HEAD(input$valuetext)$header) & grepl(input$extension, input$valuetext, fixed=TRUE)){
           
           if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
-            inputData <- read.csv(input$valuetext, header=input$header, sep=input$sep, quote=input$quote) #only needs to function locally, globally will reference "value()"
+            #inputData only needs to function locally, globally will reference "value()"
+            #This error check determines if this is supposed to be an excel file. If not, normal csv read
+            if(input$xl) {
+              
+            } else {
+              inputData <- read.csv(input$valuetext, header=input$header, sep=input$sep, quote=input$quote) 
+            }
             
           } else {
             stop("File is larger than import max limit (", file.size.limit, "mb)")
@@ -75,7 +85,13 @@ shinyServer(function(input, output, session) {
         if(userFile$size > (file.size.limit*1000000)) 
           stop("File is larger than import max limit (", file.size.limit, "mb)")
         
-        inputData <- read.csv(userFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
+        #This error check determines if this is supposed to be an excel file. If not, normal csv read
+        if(input$xl) {
+          
+        } else {
+          inputData <- read.csv(userFile$datapath, header=input$header, sep=input$sep, quote=input$quote) 
+        }
+        
         
         
         
