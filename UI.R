@@ -1,7 +1,9 @@
 #    http://www.beardedanalytics.com/todd/iris.csv
-if(!require("downloader")) install.packages("downloader")
-if(!require("httr")) install.packages("httr")
-if(!require("shiny")) install.packages("shiny")
+if(!require("readxl")) install.packages("readxl", dependencies=TRUE)
+if(!require("downloader")) install.packages("downloader", dependencies=TRUE)
+if(!require("httr")) install.packages("httr", dependencies=TRUE)
+if(!require("shiny")) install.packages("shiny", dependencies=TRUE)
+library(readxl)
 library(downloader)
 library(httr)
 library(shiny)
@@ -77,10 +79,11 @@ shinyUI(pageWithSidebar(
         conditionalPanel(
           condition = 'input.xl==true',
           
-          radioButtons('whichxl', 'xls or xslx?',
-                       c(xls='xls',
-                         xlsx='xlsx'),
-                       'xls')
+          #this changes "extension" to be xls or xlsx, depending on the user selection (for error checking). This changes the value above, so we use '.csv' as the default (to keep .csv the default formatting overall)
+          radioButtons('extension', 'xls or xslx?',
+                       c(xls='.xls',
+                         xlsx='.xlsx'),
+                       '.csv')
         )
       )
     )
