@@ -43,6 +43,8 @@ shinyUI(pageWithSidebar(
                   
         h5("If your file isn't a CSV, please give us some information to help us read it in:"),
         
+        tags$sub("Note that changing the options below may remove some error checks"),
+        
         hr(),
         
         checkboxInput('header', 'Check if the first row of your file contains headers', TRUE), 
