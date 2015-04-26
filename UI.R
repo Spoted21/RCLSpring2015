@@ -43,7 +43,7 @@ shinyUI(pageWithSidebar(
                   
         h5("If your file isn't a CSV, please give us some information to help us read it in:"),
         
-        tags$sub("Note that changing the options below may remove some error checks"),
+        #tags$sub("Note that changing the options below may remove some error checks"),
         
         hr(),
         
@@ -66,7 +66,12 @@ shinyUI(pageWithSidebar(
                        c(None='',
                          'Double Quote'='"',
                          'Single Quote'="'"),
-                       '"')
+                       '"'),
+          
+          radioButtons('extension', 'Is the file a csv or txt?',
+                       c(CSV='.csv',
+                         TXT='.txt'),
+                       '.csv')
         ),
         
         conditionalPanel(
