@@ -53,11 +53,14 @@ shinyServer(function(input, output, session) {
         } else if (!('content-length' %in% names(HEAD(input$valuetext)$header))) {
           stop("File length cannot be determined. Ensure file is csv.")
           
-        } else if (!grepl(".csv", input$valuetext, fixed=TRUE)) {
+        } else if (!grepl(input$extension, input$valuetext, fixed=TRUE)) {
           stop("Path does not read as csv, please double check path.")
           
         } else {
-          stop("Unspecified error in reading file.")
+          # Error checks failed... This will try to read the file in anyways and, if there is an error, return that there was an unspecifid error
+          lastDitch <- try(read.csv(input$valuetext), silent=TRUE)
+          if(class(lastDitch)=="try-error") stop("Unspecified error in reading file.")
+          inputData <- read.csv(input$valuetext)
         }
         
         
