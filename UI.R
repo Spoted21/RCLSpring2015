@@ -39,9 +39,7 @@ shinyUI(pageWithSidebar(
       
       tabPanel("Change Input File Type",
                
-               h5("If your file isn't a CSV, please give us some information to help us read it in:"),
-               
-               #tags$sub("Note that changing the options below may remove some error checks"),
+               h5("Here you can provide details about the format of your data:"),
                
                hr(),
                
