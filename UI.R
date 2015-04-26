@@ -39,12 +39,42 @@ shinyUI(pageWithSidebar(
         uiOutput("uiVar") #created on the server side to give options based on data columns
       ),
     
-      tabPanel("Data Types",
+      tabPanel("Change Input File Type",
                   
-        h5("If your file isn't a CSV, please give us some information to help us read it in")
+        h5("If your file isn't a CSV, please give us some information to help us read it in:"),
         
+        hr(),
         
-      
+        checkboxInput('header', 'Check if the first row of your file contains headers', TRUE), 
+        
+        checkboxInput("xl", "Check if your file an xls or xlsx file", FALSE),
+        
+        hr(),
+        
+        conditionalPanel(
+          condition = 'input.xl==false',
+        
+          radioButtons('sep', 'Separator',
+                       c(Comma=',',
+                         Semicolon=';',
+                         Tab='\t'),
+                       ','),
+          
+          radioButtons('quote', 'Quote',
+                       c(None='',
+                         'Double Quote'='"',
+                         'Single Quote'="'"),
+                       '"')
+        ),
+        
+        conditionalPanel(
+          condition = 'input.xl==true',
+          
+          radioButtons('whichxl', 'xls or xslx?',
+                       c(xls='xls',
+                         xlsx='xlsx'),
+                       'xls')
+        )
       )
     )
   ),
