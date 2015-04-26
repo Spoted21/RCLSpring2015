@@ -12,28 +12,41 @@ shinyUI(pageWithSidebar(
   
   sidebarPanel(
     
-    #adding the ability to chose between a local file and an online file
-    selectInput("locvsurl", "Select whether you'd prefer to use a local file or one from the web:",
-                choices = list("Local File" = "local",
-                               "URL" = "url"), selected="url"),
+    tabsetPanel(
+      
+      tabPanel("Start",
+                
+        selectInput("locvsurl", "Select whether you'd prefer to use a local file or one from the web:",
+                    choices = list("Local File" = "local",
+                                   "URL" = "url"), selected="url"),
+        
+        textOutput("defaultText"),
+        
+        uiOutput("uiFile"),
+        # Copy the line below to make an action button
+        actionButton("action", label = "Get Data"),
+        hr(),
+        hr(),
+        h4("Data Summary"),
+        wellPanel( 
+          textOutput("DataSummaryText")
+        ),
+        hr(),
+        h4("Select Data"),
+        checkboxInput("selectData", "Check if you wish to specify columns", value=FALSE),
+        
+        hr(),
+        uiOutput("uiVar") #created on the server side to give options based on data columns
+      ),
     
-    textOutput("defaultText"),
-    
-    uiOutput("uiFile"),
-    # Copy the line below to make an action button
-    actionButton("action", label = "Get Data"),
-    hr(),
-    hr(),
-    h4("Data Summary"),
-    wellPanel( 
-      textOutput("DataSummaryText")
-    ),
-    hr(),
-    h4("Select Data"),
-    checkboxInput("selectData", "Check if you wish to specify columns", value=FALSE),
-    
-    hr(),
-    uiOutput("uiVar") #created on the server side to give options based on data columns
+      tabPanel("Data Types",
+                  
+        h5("If your file isn't a CSV, please give us some information to help us read it in")
+        
+        
+      
+      )
+    )
   ),
   #
   mainPanel(
