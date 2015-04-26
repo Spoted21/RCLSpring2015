@@ -45,7 +45,8 @@ shinyServer(function(input, output, session) {
         if('content-length' %in% names(HEAD(input$valuetext)$header) & grepl(input$extension, input$valuetext, fixed=TRUE)){
           
           if(as.numeric(HEAD(input$valuetext)$headers$"content-length")<(file.size.limit*1000000)){
-            inputData <- read.csv(input$valuetext) #only needs to function locally, globally will reference "value()"
+            inputData <- read.csv(input$valuetext, header=input$header, sep=input$sep, quote=input$quote) #only needs to function locally, globally will reference "value()"
+            
           } else {
             stop("File is larger than import max limit (", file.size.limit, "mb)")
           }
@@ -54,7 +55,7 @@ shinyServer(function(input, output, session) {
           stop("File length cannot be determined. Ensure file is csv.")
           
         } else if (!grepl(input$extension, input$valuetext, fixed=TRUE)) {
-          stop("Path does not read as csv, please double check path.")
+          stop("Path does not read as declared file type (", input$extension, "). Please double check path or file type options.")
           
         } else {
           stop("Unspecified error in reading file.")
@@ -67,12 +68,14 @@ shinyServer(function(input, output, session) {
         userFile <- input$localFile #has "name" (which seems to end in the .csv), size, type (doesn't seem to work), and "datapath" which is where the file is
         
         # check that filepath is a csv
-        if(!grepl(".csv", userFile$name, fixed=TRUE)) stop("Path does not read as csv, please double check path.")
+        if(!grepl(input$extension, input$valuetext, fixed=TRUE)) 
+          stop("Path does not read as declared file type (", input$extension, "). Please double check path or file type options.")
         
         # check that the file size is less than 5 mb (or whatever limit is set at the beginning of this file)
-        if(userFile$size > (file.size.limit*1000000)) stop("File is larger than import max limit (", file.size.limit, "mb)")
+        if(userFile$size > (file.size.limit*1000000)) 
+          stop("File is larger than import max limit (", file.size.limit, "mb)")
         
-        inputData <- read.csv(userFile$datapath)
+        inputData <- read.csv(userFile$datapath, header=input$header, sep=input$sep, quote=input$quote)
         
         
         
