@@ -53,7 +53,7 @@ shinyServer(function(input, output, session) {
         } else if (!('content-length' %in% names(HEAD(input$valuetext)$header))) {
           stop("File length cannot be determined. Ensure file is csv.")
           
-        } else if (HEAD(input$valuetext)$headers$"content-type" != "text/csv") {
+        } else if (!grepl(".csv", input$valuetext, fixed=TRUE)) {
           stop("Path does not read as csv, please double check path.")
           
         } else {
