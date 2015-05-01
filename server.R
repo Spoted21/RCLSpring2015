@@ -96,6 +96,7 @@ shinyServer(function(input, output, session) {
   
   #creating a UI selection menu based off of the input dataset
   output$uiVar <- renderUI({
+    
     #if "selectData" hasn't been selected OR users haven't read in data, don't execute
     if(input$selectData == FALSE | input$action == 0)
       return()
@@ -122,12 +123,14 @@ shinyServer(function(input, output, session) {
   
   #generating the dataset to be displayed
   output$dataset <- renderDataTable({
+    
     #don't bother if the user hasn't input a dataset
     if(input$action == 0) 
       return()
     
     if(input$selectData & !is.null(input$selected)) {
       value()[input$selected] #have to do this as the table will break if it gets a null value for even a second... other tables and plots just flash null then get reloaded... This also protects agains if there is no checkboxes checked...
+      
     } else {
       value()
     }
@@ -139,6 +142,7 @@ shinyServer(function(input, output, session) {
   
   #creating the summary statistics to be displayed
   output$summary <- renderTable({
+    
     #don't bother if the user hasn't input a dataset
     if(input$action == 0) 
       return()
@@ -156,6 +160,7 @@ shinyServer(function(input, output, session) {
   
   #creating the boxplot to be displayed  
   output$plot <- renderPlot({
+    
     #don't bother if the user hasn't input a dataset
     if(input$action == 0) 
       return()
@@ -173,6 +178,7 @@ shinyServer(function(input, output, session) {
   
   #creating the scatterplot to be displayed
   output$ScatPlot <- renderPlot({
+    
     #don't bother if the user hasn't input a dataset
     if(input$action == 0) 
       return()
@@ -190,6 +196,7 @@ shinyServer(function(input, output, session) {
   
   #allowing user to select the DV (for multiple regression) from the list of variables
   output$uiDV <- renderUI({
+    
     #don't bother if the user hasn't input a dataset
     if(input$action == 0)
       return()
@@ -207,49 +214,59 @@ shinyServer(function(input, output, session) {
   
   #generates a regression model based on the selected DV and included IVs
   regressionModel <- reactive({
-    #don't bother if the user hasn't input a dataset
-    if(input$action == 0)
+    
+    #don't run if the DV hasn't been loaded yet
+    if(is.null(input$dv))
       return()
-    
-    #ensures the DV is read in before the regression model is made
-    if(!exists("input$dv")){
-      if(!is.null(input$dv)){
-      if(input$selectData & !is.null(input$selected)){
-        if(length(input$selected)<2)
-          stop("2 or more variables are needed for regression")
+      
+    #checks if user has selected columns (if so, run regression with only selected columns)
+    if(input$selectData & !is.null(input$selected)){
+      
+      #checks that user has selected more than 2 variables
+      if(length(input$selected)<2)
+        stop("2 or more variables are needed for regression")
+      
+      #need a special proceedure if user only has 2 variables
+      if(length(input$selected)==2){
+        dvColNum <- which(input$selected == input$dv)
+        ivColNum <- which(input$selected != input$dv)
         
-        if(length(input$selected)==2){
-          dvColNum <- which(input$selected == input$dv)
-          ivColNum <- which(input$selected != input$dv)
-          
-          lm(
-            as.formula(
-              paste0(input$selected[dvColNum],
-                "~",
-                input$selected[ivColNum]
-              )
-            ),
-            data=value()[input$selected]
-          )
-        } else {
-          dvColNum <- which(input$selected == input$dv)
-          
-          lm(value()[input$selected][,dvColNum] ~ ., 
-             data = value()[input$selected][,-dvColNum])
-        }
+        lm(
+          as.formula(
+            paste0(input$selected[dvColNum],
+              "~",
+              input$selected[ivColNum]
+            )
+          ),
+          data=value()[input$selected]
+        )
+        
+      #following chunk executes if 3 vars or more
       } else {
-        dvColNum <- which(names(value()) == input$dv)
+        dvColNum <- which(input$selected == input$dv)
         
-        lm(value()[,dvColNum] ~ ., 
-           data=value()[,-dvColNum])
+        lm(value()[input$selected][,dvColNum] ~ ., 
+           data = value()[input$selected][,-dvColNum])
+        
       }
-      }
+      
+    #this chunk executes if the user hasn't selected variables (runs with all vars in dataset)
+    } else {
+      dvColNum <- which(names(value()) == input$dv)
+      
+      lm(value()[,dvColNum] ~ ., 
+         data=value()[,-dvColNum])
+      
     }
-    
   })
   
   
+  
+  
+  
+  #creating the output for multiple regression
   output$regressionTable <- renderTable({
+    
     #don't bother if the user hasn't input a dataset
     if(input$action == 0)
       return()
@@ -257,22 +274,23 @@ shinyServer(function(input, output, session) {
     regressionModel()
   })
   
+  
+  
+  
+  
+  #providing the user with the adjusted R^2 from the model
   output$adjRSq <- renderText({
+    
     #don't bother if the user hasn't input a dataset
     if(input$action == 0)
       return()
     
-    #use "getElement", as $ throws the error "$ invalid for atomic vectors"
-    getElement(summary(regressionModel()), "adj.r.squared")
+    #make sure that the model is formed before asking it for the adjuster R^2
+    if(!is.null(regressionModel())){
+      
+      #use "getElement", as $ throws the error "$ invalid for atomic vectors"
+      getElement(summary(regressionModel()), "adj.r.squared")
+    
+    }
   })
-  
 })
-
-
-# 
-# shinyServer(function(input, output) {
-#   output$value2 <- renderPrint({ input$action })
-#   # You can access the value of the widget with input$text, e.g.
-#   output$value <- renderPrint({ input$text })
-#   
-# })
