@@ -31,7 +31,7 @@ shinyUI(pageWithSidebar(
                ),
                hr(),
                h4("Select Data"),
-               checkboxInput("selectData", "Check if you wish to specify columns", value=FALSE),
+               checkboxInput("selectCheck", "Check if you wish to specify columns", value=FALSE),
                
                hr(),
                uiOutput("uiVar") #created on the server side to give options based on data columns
