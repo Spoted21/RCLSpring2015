@@ -32,8 +32,9 @@ shinyServer(function(input, output, session) {
   
   
   
-  #this evaluates only when the action button ("Get Data" from user perspective) is pressed
-  value <- reactive({
+  #this evaluates only when the action button ("Get Data" from user perspective) is pressed.
+  #  this variable (fullData()) the data that will be used through the rest of the application
+  fullData <- reactive({
     input$action
     
     #code inside isolate does not trigger the "reactive" to re-evaluate
@@ -51,7 +52,7 @@ shinyServer(function(input, output, session) {
             stop("File is larger than import max limit (", file.size.limit, "mb)")
           
           #if file length checks out, this evaluates
-          #inputData only needs to function locally, globally will reference "value()"
+          #inputData only needs to function locally, globally will reference "fullData()"
           inputData <- read.csv(input$valuetext, header=input$header, sep=input$sep, quote=input$quote) 
             
         #didn't pass error checks (file length reported and extension match), so check which went wrong and return a specified error
@@ -99,13 +100,33 @@ shinyServer(function(input, output, session) {
   #creating a UI selection menu based off of the input dataset
   output$uiVar <- renderUI({
     
-    #if "selectData" hasn't been selected OR users haven't read in data, don't execute
-    if(input$selectData == FALSE | input$action == 0)
+    #if "selectCheck" hasn't been selected OR users haven't read in data, don't execute
+    if(input$selectCheck == FALSE | input$action == 0)
       return()
     
     #make a checkbox group with the columns as options
-    checkboxGroupInput("selected", "Which variables do you wish to include?", choices=names(value()), selected = names(value()))
+    checkboxGroupInput("selected", "Which variables do you wish to include?", choices=names(fullData()), selected = names(fullData()))
   })
+  
+  
+  
+  
+  
+  #create dataset (based on overall dataset) that includes "correct" variables (all values if "selectCheck" hasn't been chosen, and user selected variables if it has)
+  selectedData <- reactive({
+    #don't bother if the user hasn't input a dataset
+    if(input$action == 0) 
+      return()
+    
+    #if users select columns, use only selected columns; otherwise, use full dataset. Done this way (instead of just writing "fullData()") to match other outputs
+    if(input$selectCheck & !is.null(input$selected)) {
+      fullData()[input$selected]
+      
+    } else {
+      fullData()
+    }
+  })
+  
   
   
   
@@ -118,10 +139,19 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
-    paste0("Your dataset has " , nrow(value()) ," rows and ",
-           length(value()) , " columns. \n You have ", length(complete.cases(value())=="TRUE") ,
-           " complete cases which makes for ", round(1- ( length(complete.cases(value())=="TRUE") / nrow(value()) ),2),
+    if(input$selectCheck & !is.null(input$selected)) {
+    paste0("Your selected dataset has " , nrow(selectedData()) ," rows and ",
+           length(selectedData()) , " columns. \n You have ", length(complete.cases(selectedData())=="TRUE") ,
+           " complete cases which makes for ", round(1- ( length(complete.cases(selectedData())=="TRUE") / nrow(selectedData()) ),2),
            "% missing data.")
+    
+    } else {
+      paste0("Your dataset has " , nrow(fullData()) ," rows and ",
+             length(fullData()) , " columns. \n You have ", length(complete.cases(fullData())=="TRUE") ,
+             " complete cases which makes for ", round(1- ( length(complete.cases(fullData())=="TRUE") / nrow(fullData()) ),2),
+             "% missing data.")
+      
+    }
     
   })
   
@@ -136,14 +166,8 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
-    #if users select columns, use only selected columns; otherwise, use full dataset
-    if(input$selectData & !is.null(input$selected)) {
-      value()[input$selected] #have to do this as the table will break if it gets a null value for even a second... other tables and plots just flash null then get reloaded... This also protects agains if there is no checkboxes checked...
-      
-    } else {
-      value()
-      
-    }
+    selectedData()
+    
   })
   
   
@@ -157,14 +181,9 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
-    #if users select columns, use only selected columns; otherwise, use full dataset
-    if(input$selectData & !is.null(input$selected)) {
-      summary(value()[input$selected])
-      
-    } else {
-      summary(value())
-      
-    }
+    #summarize the data
+    summary(selectedData())
+    
   })
   
   
@@ -178,14 +197,8 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
-    #if users select columns, use only selected columns; otherwise, use full dataset
-    if(input$selectData & !is.null(input$selected)) {
-      boxplot(value()[input$selected],las=1,col=c("orange","lightgreen","lightblue"))
+    boxplot(selectedData(),las=1,col=c("orange","lightgreen","lightblue"))
       
-    } else {
-      boxplot(value(),las=1,col=c("orange","lightgreen","lightblue"))
-      
-    }
   })
   
   
@@ -200,11 +213,11 @@ shinyServer(function(input, output, session) {
       return()
     
     #if users select columns, use only selected columns; otherwise, use full dataset
-    if(input$selectData & !is.null(input$selected)) {
-      plot(value()[input$selected])
+    if(input$selectCheck & !is.null(input$selected)) {
+      plot(fullData()[input$selected])
       
     } else {
-      plot(value())
+      plot(fullData())
       
     }
   })
@@ -221,11 +234,11 @@ shinyServer(function(input, output, session) {
       return()
     
     #if users select columns, use only selected columns; otherwise, use full dataset
-    if(input$selectData & !is.null(input$selected)){
+    if(input$selectCheck & !is.null(input$selected)){
       selectInput("dv", "Please select the dependent variable", choices=input$selected)
       
     } else {
-      selectInput("dv", "Please select the dependent variable", choices=names(value()))
+      selectInput("dv", "Please select the dependent variable", choices=names(fullData()))
       
     }
   })
@@ -242,7 +255,7 @@ shinyServer(function(input, output, session) {
       return()
       
     #checks if user has selected columns (if so, run regression with only selected columns)
-    if(input$selectData & !is.null(input$selected)){
+    if(input$selectCheck & !is.null(input$selected)){
       
       #checks that user has selected more than 2 variables
       if(length(input$selected)<2)
@@ -260,24 +273,24 @@ shinyServer(function(input, output, session) {
               input$selected[ivColNum]
             )
           ),
-          data=value()[input$selected]
+          data=fullData()[input$selected]
         )
         
       #following chunk executes if 3 vars or more
       } else {
         dvColNum <- which(input$selected == input$dv)
         
-        lm(value()[input$selected][,dvColNum] ~ ., 
-           data = value()[input$selected][,-dvColNum])
+        lm(fullData()[input$selected][,dvColNum] ~ ., 
+           data = fullData()[input$selected][,-dvColNum])
         
       }
       
     #this chunk executes if the user hasn't selected variables (runs with all vars in dataset)
     } else {
-      dvColNum <- which(names(value()) == input$dv)
+      dvColNum <- which(names(fullData()) == input$dv)
       
-      lm(value()[,dvColNum] ~ ., 
-         data=value()[,-dvColNum])
+      lm(fullData()[,dvColNum] ~ ., 
+         data=fullData()[,-dvColNum])
       
     }
   })
