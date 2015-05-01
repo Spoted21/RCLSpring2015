@@ -24,6 +24,7 @@ shinyServer(function(input, output, session) {
       
     } else {
       return()
+      
     }
   })
   
@@ -63,6 +64,7 @@ shinyServer(function(input, output, session) {
         #neither predicted error went wrong, so return that there was an unspecified error
         } else {
           stop("Unspecified error in reading file.")
+          
         }
         
         
@@ -101,6 +103,7 @@ shinyServer(function(input, output, session) {
     if(input$selectData == FALSE | input$action == 0)
       return()
     
+    #make a checkbox group with the columns as options
     checkboxGroupInput("selected", "Which variables do you wish to include?", choices=names(value()), selected = names(value()))
   })
   
@@ -110,11 +113,16 @@ shinyServer(function(input, output, session) {
   
   #creating the data summary text (to be shown under file selection)
   output$DataSummaryText <- renderText({
-    if(input$action != 0) 
-      paste0("Your dataset has " , nrow(value()) ," rows and ",
-             length(value()) , " columns. \n You have ", length(complete.cases(value())=="TRUE") ,
-             " complete cases which makes for ",round(1- ( length(complete.cases(value())=="TRUE") / nrow(value()) ),2),
-             "% missing data.")
+    
+    #don't bother if the user hasn't input a dataset
+    if(input$action == 0) 
+      return()
+    
+    paste0("Your dataset has " , nrow(value()) ," rows and ",
+           length(value()) , " columns. \n You have ", length(complete.cases(value())=="TRUE") ,
+           " complete cases which makes for ", round(1- ( length(complete.cases(value())=="TRUE") / nrow(value()) ),2),
+           "% missing data.")
+    
   })
   
   
@@ -128,11 +136,13 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
+    #if users select columns, use only selected columns; otherwise, use full dataset
     if(input$selectData & !is.null(input$selected)) {
       value()[input$selected] #have to do this as the table will break if it gets a null value for even a second... other tables and plots just flash null then get reloaded... This also protects agains if there is no checkboxes checked...
       
     } else {
       value()
+      
     }
   })
   
@@ -147,10 +157,13 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
+    #if users select columns, use only selected columns; otherwise, use full dataset
     if(input$selectData & !is.null(input$selected)) {
       summary(value()[input$selected])
+      
     } else {
       summary(value())
+      
     }
   })
   
@@ -165,10 +178,13 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
+    #if users select columns, use only selected columns; otherwise, use full dataset
     if(input$selectData & !is.null(input$selected)) {
       boxplot(value()[input$selected],las=1,col=c("orange","lightgreen","lightblue"))
+      
     } else {
       boxplot(value(),las=1,col=c("orange","lightgreen","lightblue"))
+      
     }
   })
   
@@ -183,10 +199,13 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
+    #if users select columns, use only selected columns; otherwise, use full dataset
     if(input$selectData & !is.null(input$selected)) {
       plot(value()[input$selected])
+      
     } else {
       plot(value())
+      
     }
   })
   
@@ -201,10 +220,13 @@ shinyServer(function(input, output, session) {
     if(input$action == 0)
       return()
     
+    #if users select columns, use only selected columns; otherwise, use full dataset
     if(input$selectData & !is.null(input$selected)){
       selectInput("dv", "Please select the dependent variable", choices=input$selected)
+      
     } else {
       selectInput("dv", "Please select the dependent variable", choices=names(value()))
+      
     }
   })
   
@@ -285,12 +307,11 @@ shinyServer(function(input, output, session) {
     if(input$action == 0)
       return()
     
-    #make sure that the model is formed before asking it for the adjuster R^2
-    if(!is.null(regressionModel())){
-      
-      #use "getElement", as $ throws the error "$ invalid for atomic vectors"
-      getElement(summary(regressionModel()), "adj.r.squared")
+    #if the model isn't formed, don't ask for the adjusted R^2
+    if(is.null(regressionModel()))
+      return()
     
-    }
+    getElement(summary(regressionModel()), "adj.r.squared") #use "getElement", as $ throws the error "$ invalid for atomic vectors"
+    
   })
 })
