@@ -44,32 +44,29 @@ shinyServer(function(input, output, session) {
       #  execute this chunk if user is attempting to use a URL
       if (input$locvsurl == "url") {
         
-        # see if code passes error checks of length (making sure it can be read from the input) and extension (set by user, default is .csv).
-        if('content-length' %in% names(HEAD(input$valuetext)$header) & grepl(input$extension, input$valuetext, fixed=TRUE)){
-          
-          #checking that reported length is within parameter (set above)
-          if(as.numeric(HEAD(input$valuetext)$headers$"content-length")>(file.size.limit*1000000))
-            stop("File is larger than import max limit (", file.size.limit, "mb)")
-          
-          #if file length checks out, this evaluates
-          #inputData only needs to function locally, globally will reference "fullData()"
-          inputData <- read.csv(input$valuetext, header=input$header, sep=input$sep, quote=input$quote) 
-            
-        #didn't pass error checks (file length reported and extension match), so check which went wrong and return a specified error
-        } else if (!('content-length' %in% names(HEAD(input$valuetext)$header))) {
+        #see if URL reports file length. If not, do not import.
+        if (!('content-length' %in% names(HEAD(input$valuetext)$header)))
           stop("File length cannot be determined (check that file exists).\nUnable to determine length is less than max limit (", file.size.limit, "mb).\nAborting import.")
-          
-        } else if (!grepl(input$extension, input$valuetext, fixed=TRUE)) {
+        
+        #see if the extension declared is included in the filepath
+        if (!grepl(input$extension, input$valuetext, fixed=TRUE))
           stop("Path does not read as declared file type (", input$extension, "). Please double check path or file type options.")
-          
-        #neither predicted error went wrong, so return that there was an unspecified error
-        } else {
-          stop("Unspecified error in reading file.")
-          
-        }
         
+        #checking that reported length is within parameter (set above)
+        if(as.numeric(HEAD(input$valuetext)$headers$"content-length")>(file.size.limit*1000000))
+          stop("File is larger than import max limit (", file.size.limit, "mb)")
         
+        #passed all considered error checks, so try to read in the data
+        trialRead <- try(inputData <- read.csv(input$valuetext, header=input$header, sep=input$sep, quote=input$quote), 
+                         silent=TRUE)
         
+        #check if the "try()" failed. If so, an unconsidered error occured
+        if(class(trialRead) == "try-error")
+          stop("Unspecified Error")
+        
+        #if there was no failure, output the value of "trialRead" (should be "inputData")
+        trialRead
+      
       #  execute this chunk if user is attempting to use a local file (named input$localFile)  
       } else if(input$locvsurl == "local") {
         
@@ -82,8 +79,17 @@ shinyServer(function(input, output, session) {
         # check that the file size is less than 5 mb (or whatever limit is set at the beginning of this file)
         if(userFile$size > (file.size.limit*1000000)) 
           stop("File is larger than import max limit (", file.size.limit, "mb)")
+         
+        #passed all considered error checks, so try to read in the data
+        trialRead <- try(inputData <- read.csv(userFile$datapath, header=input$header, sep=input$sep, quote=input$quote), 
+                         silent=TRUE)
         
-        inputData <- read.csv(userFile$datapath, header=input$header, sep=input$sep, quote=input$quote)        
+        #check if the "try()" failed. If so, an unconsidered error occured
+        if(class(trialRead) == "try-error")
+          stop("Unspecified Error")
+        
+        #if there was no failure, output the value of "trialRead" (should be "inputData")
+        trialRead
 
       #user input for local or url file is not being read correctly...
       } else {
@@ -106,17 +112,23 @@ shinyServer(function(input, output, session) {
     
     #make a checkbox group with the columns as options
     checkboxGroupInput("selected", "Which variables do you wish to include?", choices=names(fullData()), selected = names(fullData()))
+    
   })
   
   
   
   
   
-  #create dataset (based on overall dataset) that includes "correct" variables (all values if "selectCheck" hasn't been chosen, and user selected variables if it has)
+  #create dataset (based on overall dataset) that includes all variables (if selected isn't checked),
+  #  or just the variables the user has selected (if it is checked)
   selectedData <- reactive({
     #don't bother if the user hasn't input a dataset
     if(input$action == 0) 
       return()
+    
+    #makes sure that the user has at least 2 variable selected (if they've elected to select variables)
+    if(input$selectCheck & is.null(input$selected))
+      stop("At least 1 variable must be selected")
     
     #if users select columns, use only selected columns; otherwise, use full dataset. Done this way (instead of just writing "fullData()") to match other outputs
     if(input$selectCheck & !is.null(input$selected)) {
@@ -124,9 +136,9 @@ shinyServer(function(input, output, session) {
       
     } else {
       fullData()
+      
     }
   })
-  
   
   
   
@@ -139,6 +151,11 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
+    #need the error to prevent text from generating when no variables are selected
+    if(input$selectCheck & is.null(input$selected))
+      stop("At least 1 variable must be selected")
+    
+    #need the if/else as the words are different depending on which is used. First chunk for when user has selected data
     if(input$selectCheck & !is.null(input$selected)) {
     paste0("Your selected dataset has " , nrow(selectedData()) ," rows and ",
            length(selectedData()) , " columns. \n You have ", length(complete.cases(selectedData())=="TRUE") ,
@@ -152,7 +169,6 @@ shinyServer(function(input, output, session) {
              "% missing data.")
       
     }
-    
   })
   
   
@@ -166,6 +182,7 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
+    #output the dataset "selectedData()"
     selectedData()
     
   })
@@ -197,6 +214,7 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
+    #create a boxplot of the data. las turns the names, col gives colors (that repeat as needed)
     boxplot(selectedData(),las=1,col=c("orange","lightgreen","lightblue"))
       
   })
@@ -212,14 +230,9 @@ shinyServer(function(input, output, session) {
     if(input$action == 0) 
       return()
     
-    #if users select columns, use only selected columns; otherwise, use full dataset
-    if(input$selectCheck & !is.null(input$selected)) {
-      plot(fullData()[input$selected])
-      
-    } else {
-      plot(fullData())
-      
-    }
+    #plot the data
+    plot(selectedData())
+    
   })
   
   
@@ -233,14 +246,9 @@ shinyServer(function(input, output, session) {
     if(input$action == 0)
       return()
     
-    #if users select columns, use only selected columns; otherwise, use full dataset
-    if(input$selectCheck & !is.null(input$selected)){
-      selectInput("dv", "Please select the dependent variable", choices=input$selected)
-      
-    } else {
-      selectInput("dv", "Please select the dependent variable", choices=names(fullData()))
-      
-    }
+    #allow users to select choices from the column names of the data
+    selectInput("dv", "Please select the dependent variable", choices=names(selectedData()))
+    
   })
   
   
@@ -253,44 +261,32 @@ shinyServer(function(input, output, session) {
     #don't run if the DV hasn't been loaded yet
     if(is.null(input$dv))
       return()
+            
+    #throws error if user selects less than 2 variables
+    if(ncol(selectedData())<2)
+      stop("2 or more variables are needed for regression")
+    
+    #executes a special proceedure if user only selects 2 variables
+    if(ncol(selectedData())==2){
+      dvColNum <- which(names(selectedData()) == input$dv)
+      ivColNum <- which(names(selectedData()) != input$dv)
       
-    #checks if user has selected columns (if so, run regression with only selected columns)
-    if(input$selectCheck & !is.null(input$selected)){
+      #use this formula so that names still display to user in the regression output
+      lm(
+        as.formula(
+          paste0(input$selected[dvColNum],
+                 "~",
+                 input$selected[ivColNum])
+        ),
+        data=selectedData()
+      )
       
-      #checks that user has selected more than 2 variables
-      if(length(input$selected)<2)
-        stop("2 or more variables are needed for regression")
-      
-      #need a special proceedure if user only has 2 variables
-      if(length(input$selected)==2){
-        dvColNum <- which(input$selected == input$dv)
-        ivColNum <- which(input$selected != input$dv)
-        
-        lm(
-          as.formula(
-            paste0(input$selected[dvColNum],
-              "~",
-              input$selected[ivColNum]
-            )
-          ),
-          data=fullData()[input$selected]
-        )
-        
-      #following chunk executes if 3 vars or more
-      } else {
-        dvColNum <- which(input$selected == input$dv)
-        
-        lm(fullData()[input$selected][,dvColNum] ~ ., 
-           data = fullData()[input$selected][,-dvColNum])
-        
-      }
-      
-    #this chunk executes if the user hasn't selected variables (runs with all vars in dataset)
+    #following chunk executes if 3 vars or more
     } else {
-      dvColNum <- which(names(fullData()) == input$dv)
+      dvColNum <- which(names(selectedData()) == input$dv)
       
-      lm(fullData()[,dvColNum] ~ ., 
-         data=fullData()[,-dvColNum])
+      lm(selectedData()[,dvColNum] ~ ., 
+         data = selectedData()[,-dvColNum])
       
     }
   })
@@ -306,7 +302,9 @@ shinyServer(function(input, output, session) {
     if(input$action == 0)
       return()
     
+    #display the regression model
     regressionModel()
+    
   })
   
   
@@ -324,6 +322,7 @@ shinyServer(function(input, output, session) {
     if(is.null(regressionModel()))
       return()
     
+    #grab the adjusted R^2 of the model
     getElement(summary(regressionModel()), "adj.r.squared") #use "getElement", as $ throws the error "$ invalid for atomic vectors"
     
   })
