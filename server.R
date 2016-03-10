@@ -215,7 +215,7 @@ shinyServer(function(input, output, session) {
       return()
     
     #create a boxplot of the data. las turns the names, col gives colors (that repeat as needed)
-    boxplot(selectedData(),las=1,col=c("orange","lightgreen","lightblue"))
+    boxplot(selectedData(),las=1,col=c("wheat", "orange","lightgreen","lightblue","thistle"))
       
   })
   
@@ -231,7 +231,7 @@ shinyServer(function(input, output, session) {
       return()
     
     #plot the data
-    plot(selectedData())
+    plot(selectedData(),las=1)
     
   })
   
