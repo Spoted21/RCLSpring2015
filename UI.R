@@ -7,7 +7,7 @@ library(shiny)
 
 
 shinyUI(pageWithSidebar(
-  headerPanel("CSV Exploratory Tool"),
+  headerPanel("Quick Explore"),
   
   sidebarPanel(
     
